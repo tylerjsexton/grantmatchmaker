@@ -1,8 +1,5 @@
 
-import { Suspense } from 'react'
 import { SearchIcon, DollarSignIcon, CalendarIcon, BuildingIcon } from 'lucide-react'
-import { GrantsListContainer } from '@/components/grants-list-container'
-import { SearchFilters } from '@/components/search-filters'
 import { StatsCards } from '@/components/stats-cards'
 import { db } from '@/lib/db'
 
@@ -99,44 +96,47 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Search and Results Section */}
-      <section className="py-8">
+      {/* Getting Started Section */}
+      <section className="py-12">
         <div className="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            {/* Search Filters Sidebar */}
-            <div className="lg:col-span-1">
-              <div className="sticky top-24">
-                <Suspense fallback={
-                  <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
-                    <div className="animate-pulse">
-                      <div className="h-4 bg-gray-200 rounded mb-4"></div>
-                      <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                      <div className="h-4 bg-gray-200 rounded"></div>
-                    </div>
+          <div className="text-center">
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              Get Started
+            </h3>
+            <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
+              Click on any of the summary cards above to explore grant opportunities. 
+              Use the search and filtering tools to find grants that match your specific needs.
+            </p>
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg p-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                <div>
+                  <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <SearchIcon className="h-6 w-6 text-white" />
                   </div>
-                }>
-                  <SearchFilters />
-                </Suspense>
-              </div>
-            </div>
-
-            {/* Grants List */}
-            <div className="lg:col-span-3">
-              <Suspense fallback={
-                <div className="space-y-6">
-                  {[...Array(3)].map((_, i) => (
-                    <div key={i} className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
-                      <div className="animate-pulse">
-                        <div className="h-6 bg-gray-200 rounded mb-4"></div>
-                        <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                      </div>
-                    </div>
-                  ))}
+                  <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Search & Filter</h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                    Use advanced filters to find grants by agency, funding amount, deadline, and category
+                  </p>
                 </div>
-              }>
-                <GrantsListContainer />
-              </Suspense>
+                <div>
+                  <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <CalendarIcon className="h-6 w-6 text-white" />
+                  </div>
+                  <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Track Deadlines</h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                    Monitor application deadlines and get detailed information about each opportunity
+                  </p>
+                </div>
+                <div>
+                  <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <DollarSignIcon className="h-6 w-6 text-white" />
+                  </div>
+                  <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Find Funding</h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                    Discover funding opportunities from federal agencies across various categories
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>

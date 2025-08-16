@@ -34,7 +34,9 @@ export function SearchFilters() {
     if (maxFunding[0] < 100000000) params.set('maxFunding', maxFunding[0].toString())
     if (status !== 'all') params.set('status', status)
     
-    router.push(`/?${params.toString()}`)
+    // Always navigate to grants page when searching
+    const queryString = params.toString()
+    router.push(queryString ? `/grants?${queryString}` : '/grants')
   }
 
   const clearFilters = () => {
@@ -45,7 +47,7 @@ export function SearchFilters() {
     setMinFunding([0])
     setMaxFunding([100000000])
     setStatus('all')
-    router.push('/')
+    router.push('/grants')
   }
 
   useEffect(() => {

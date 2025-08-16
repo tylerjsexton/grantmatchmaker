@@ -34,11 +34,15 @@ export function GrantsListContainer() {
   const [grants, setGrants] = useState<Grant[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [page, setPage] = useState(1)
-  const [hasMore, setHasMore] = useState(true)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalCount, setTotalCount] = useState(0)
 
   useEffect(() => {
-    fetchGrants(1) // Reset to first page when search params change
+    const pageParam = searchParams?.get('page')
+    const newPage = pageParam ? parseInt(pageParam) : 1
+    setCurrentPage(newPage)
+    fetchGrants(newPage)
   }, [searchParams])
 
   const fetchGrants = async (pageNum: number) => {
@@ -58,14 +62,10 @@ export function GrantsListContainer() {
 
       const data = await response.json()
       
-      if (pageNum === 1) {
-        setGrants(data?.grants || [])
-      } else {
-        setGrants(prev => [...(prev || []), ...(data?.grants || [])])
-      }
-      
-      setHasMore(data?.hasMore || false)
-      setPage(pageNum)
+      setGrants(data?.grants || [])
+      setTotalPages(data?.totalPages || 1)
+      setTotalCount(data?.total || 0)
+      setCurrentPage(pageNum)
     } catch (err) {
       console.error('Error fetching grants:', err)
       setError(err instanceof Error ? err?.message : 'Failed to fetch grants')
@@ -74,13 +74,17 @@ export function GrantsListContainer() {
     }
   }
 
-  const loadMore = () => {
-    if (!loading && hasMore) {
-      fetchGrants(page + 1)
-    }
+  const handlePageChange = (newPage: number) => {
+    if (newPage < 1 || newPage > totalPages || newPage === currentPage) return
+    
+    const params = new URLSearchParams(searchParams?.toString() || '')
+    params.set('page', newPage.toString())
+    
+    window.history.pushState(null, '', `?${params.toString()}`)
+    fetchGrants(newPage)
   }
 
-  if (loading && page === 1) {
+  if (loading && currentPage === 1) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="flex items-center space-x-2">
@@ -115,35 +119,125 @@ export function GrantsListContainer() {
 
   return (
     <div className="space-y-6">
+      {/* Header with results count */}
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-          Grant Opportunities ({grants?.length || 0} found)
-        </h3>
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Grant Opportunities
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            {totalCount > 0 
+              ? `Showing ${(currentPage - 1) * 10 + 1}-${Math.min(currentPage * 10, totalCount)} of ${totalCount} grants` 
+              : 'No grants found'
+            }
+          </p>
+        </div>
+        {loading && currentPage > 1 && (
+          <div className="flex items-center space-x-2">
+            <LoaderIcon className="h-4 w-4 animate-spin text-blue-600" />
+            <span className="text-sm text-gray-600">Loading...</span>
+          </div>
+        )}
       </div>
 
+      {/* Grants List */}
       <div className="space-y-6">
         {grants?.map((grant) => (
           <GrantCard key={grant?.id} grant={grant} />
         ))}
       </div>
 
-      {hasMore && (
-        <div className="flex justify-center pt-6">
-          <Button 
-            onClick={loadMore} 
-            disabled={loading}
-            variant="outline"
-            size="lg"
-          >
-            {loading ? (
-              <>
-                <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />
-                Loading...
-              </>
-            ) : (
-              'Load More Grants'
-            )}
-          </Button>
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex items-center space-x-2">
+            <Button 
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1 || loading}
+              variant="outline"
+              size="sm"
+            >
+              Previous
+            </Button>
+            
+            {/* Page numbers */}
+            <div className="flex items-center space-x-1">
+              {currentPage > 2 && (
+                <>
+                  <Button
+                    onClick={() => handlePageChange(1)}
+                    disabled={loading}
+                    variant="ghost"
+                    size="sm"
+                  >
+                    1
+                  </Button>
+                  {currentPage > 3 && (
+                    <span className="text-gray-400">...</span>
+                  )}
+                </>
+              )}
+              
+              {currentPage > 1 && (
+                <Button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={loading}
+                  variant="ghost"
+                  size="sm"
+                >
+                  {currentPage - 1}
+                </Button>
+              )}
+              
+              <Button
+                disabled={true}
+                variant="default"
+                size="sm"
+              >
+                {currentPage}
+              </Button>
+              
+              {currentPage < totalPages && (
+                <Button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={loading}
+                  variant="ghost"
+                  size="sm"
+                >
+                  {currentPage + 1}
+                </Button>
+              )}
+              
+              {currentPage < totalPages - 1 && (
+                <>
+                  {currentPage < totalPages - 2 && (
+                    <span className="text-gray-400">...</span>
+                  )}
+                  <Button
+                    onClick={() => handlePageChange(totalPages)}
+                    disabled={loading}
+                    variant="ghost"
+                    size="sm"
+                  >
+                    {totalPages}
+                  </Button>
+                </>
+              )}
+            </div>
+            
+            <Button 
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages || loading}
+              variant="outline"
+              size="sm"
+            >
+              Next
+            </Button>
+          </div>
+          
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            Page {currentPage} of {totalPages}
+          </div>
         </div>
       )}
     </div>

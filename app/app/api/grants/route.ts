@@ -114,7 +114,8 @@ export async function GET(request: NextRequest) {
       db.opportunity.count({ where })
     ])
     
-    const hasMore = offset + grants.length < totalCount
+    const totalPages = Math.ceil(totalCount / limit)
+    const hasMore = page < totalPages
     
     // Convert BigInt values to strings for JSON serialization
     const serializedGrants = grants.map(grant => ({
@@ -126,9 +127,10 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({
       grants: serializedGrants,
-      totalCount,
-      hasMore,
-      currentPage: page
+      total: totalCount,
+      totalPages,
+      currentPage: page,
+      hasMore
     })
     
   } catch (error) {
