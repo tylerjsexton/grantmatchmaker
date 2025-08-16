@@ -118,7 +118,7 @@ export async function GET(request: NextRequest) {
     const hasMore = page < totalPages
     
     // Convert BigInt values to strings for JSON serialization
-    const serializedGrants = grants.map(grant => ({
+    const serializedGrants = grants.map((grant: any) => ({
       ...grant,
       estimatedTotalFunding: grant.estimatedTotalFunding?.toString() || null,
       awardCeiling: grant.awardCeiling?.toString() || null,

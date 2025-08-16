@@ -147,7 +147,7 @@ export default async function GrantDetailPage({ params }: PageProps) {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {grant?.contacts?.map((contact, index) => (
+                  {grant?.contacts?.map((contact: any, index: number) => (
                     <div key={index} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       {contact?.contactName && (
                         <h4 className="font-medium text-gray-900 dark:text-white mb-2">
@@ -349,7 +349,7 @@ export default async function GrantDetailPage({ params }: PageProps) {
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
-                    {grant?.cfdaNumbers?.map((cfda, index) => (
+                    {grant?.cfdaNumbers?.map((cfda: any, index: number) => (
                       <Badge key={index} variant="outline">
                         {cfda}
                       </Badge>

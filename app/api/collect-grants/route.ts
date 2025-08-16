@@ -71,7 +71,7 @@ export async function GET() {
     
     return NextResponse.json({
       totalOpportunities,
-      recentChanges: recentChanges.map(change => ({
+      recentChanges: recentChanges.map((change: any) => ({
         type: change.changeType,
         date: change.changeDate,
         source: change.source,
