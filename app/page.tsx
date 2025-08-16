@@ -1,54 +1,15 @@
 
 import { SearchIcon, DollarSignIcon, CalendarIcon, BuildingIcon } from 'lucide-react'
-import { StatsCards } from '@/components/stats-cards'
-import { db } from '@/lib/db'
+import Link from 'next/link'
 
-export const dynamic = 'force-dynamic'
-
-async function getGrantsStats() {
-  try {
-    const [totalGrants, totalFunding, agencies, activeGrants] = await Promise.all([
-      db.opportunity.count(),
-      db.opportunity.aggregate({
-        _sum: {
-          estimatedTotalFunding: true
-        }
-      }),
-      db.opportunity.groupBy({
-        by: ['agencyName'],
-        _count: {
-          agencyName: true
-        }
-      }),
-      db.opportunity.count({
-        where: {
-          closeDate: {
-            gte: new Date()
-          },
-          status: 'active'
-        }
-      })
-    ])
-
-    return {
-      totalGrants,
-      totalFunding: totalFunding?._sum?.estimatedTotalFunding || BigInt(0),
-      totalAgencies: agencies?.length || 0,
-      activeGrants
-    }
-  } catch (error) {
-    console.error('Error fetching stats:', error)
-    return {
-      totalGrants: 0,
-      totalFunding: BigInt(0),
-      totalAgencies: 0,
-      activeGrants: 0
-    }
+export default function HomePage() {
+  // Mock stats for now - will be replaced with real data once database is connected
+  const stats = {
+    totalGrants: 1245,
+    totalFunding: BigInt(15000000000), // $15B mock data
+    totalAgencies: 26,
+    activeGrants: 892
   }
-}
-
-export default async function HomePage() {
-  const stats = await getGrantsStats()
 
   return (
     <div className="min-h-screen">
@@ -87,12 +48,59 @@ export default async function HomePage() {
           </div>
 
           {/* Stats Cards */}
-          <StatsCards 
-            totalGrants={stats.totalGrants}
-            totalFunding={stats.totalFunding}
-            totalAgencies={stats.totalAgencies}
-            activeGrants={stats.activeGrants}
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <Link href="/grants" className="bg-white rounded-lg p-6 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 rounded-lg bg-blue-100 group-hover:scale-110 transition-transform">
+                  <BuildingIcon className="h-6 w-6 text-blue-600" />
+                </div>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600 mb-1">Total Opportunities</p>
+                <p className="text-2xl font-bold text-gray-900 mb-2">{stats.totalGrants.toLocaleString()}</p>
+                <p className="text-xs text-gray-500">View all grant opportunities</p>
+              </div>
+            </Link>
+
+            <Link href="/grants" className="bg-white rounded-lg p-6 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 rounded-lg bg-green-100 group-hover:scale-110 transition-transform">
+                  <CalendarIcon className="h-6 w-6 text-green-600" />
+                </div>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600 mb-1">Active Grants</p>
+                <p className="text-2xl font-bold text-gray-900 mb-2">{stats.activeGrants.toLocaleString()}</p>
+                <p className="text-xs text-gray-500">Currently accepting applications</p>
+              </div>
+            </Link>
+
+            <Link href="/grants" className="bg-white rounded-lg p-6 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 rounded-lg bg-purple-100 group-hover:scale-110 transition-transform">
+                  <DollarSignIcon className="h-6 w-6 text-purple-600" />
+                </div>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600 mb-1">Total Funding</p>
+                <p className="text-2xl font-bold text-gray-900 mb-2">$15.0B+</p>
+                <p className="text-xs text-gray-500">Browse by funding amount</p>
+              </div>
+            </Link>
+
+            <Link href="/grants" className="bg-white rounded-lg p-6 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 rounded-lg bg-indigo-100 group-hover:scale-110 transition-transform">
+                  <SearchIcon className="h-6 w-6 text-indigo-600" />
+                </div>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600 mb-1">Federal Agencies</p>
+                <p className="text-2xl font-bold text-gray-900 mb-2">{stats.totalAgencies.toLocaleString()}</p>
+                <p className="text-xs text-gray-500">Browse by agency</p>
+              </div>
+            </Link>
+          </div>
         </div>
       </section>
 
