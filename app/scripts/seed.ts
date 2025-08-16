@@ -1,8 +1,27 @@
 
 import { db } from '../lib/db';
+import bcrypt from 'bcryptjs';
 
 async function main() {
   console.log('Seeding federal grants database...');
+
+  // Create test user for authentication testing
+  console.log('Creating test user...');
+  const hashedPassword = await bcrypt.hash('johndoe123', 12);
+  
+  const testUser = await db.user.upsert({
+    where: { email: 'john@doe.com' },
+    update: {},
+    create: {
+      email: 'john@doe.com',
+      password: hashedPassword,
+      firstName: 'John',
+      lastName: 'Doe',
+      name: 'John Doe'
+    }
+  });
+  
+  console.log(`Created test user: ${testUser.email}`);
 
   // Sample federal grants data based on grants.gov research
   const grantsData = [
