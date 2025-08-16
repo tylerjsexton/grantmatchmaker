@@ -1,0 +1,113 @@
+generator client {
+    provider = "prisma-client-js"
+    binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+    output = "/home/ubuntu/federal_grants_app/app/node_modules/.prisma/client"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+// Main opportunities table based on grants.gov schema
+model Opportunity {
+  id                           String    @id @default(cuid())
+  opportunityId               String?   @unique @map("opportunity_id") // Internal ID from grants.gov
+  opportunityNumber           String?   @map("opportunity_number") // Public-facing number
+  title                       String    // Required field, max 255 chars
+  description                 String?   @db.Text // Max 18,000 chars
+  
+  // Agency Information
+  agencyCode                  String?   @map("agency_code") // Max 255 chars
+  agencyName                  String?   @map("agency_name") // Max 255 chars
+  
+  // Timeline Information (stored as dates)
+  postDate                    DateTime? @map("post_date")
+  closeDate                   DateTime? @map("close_date")
+  archiveDate                 DateTime? @map("archive_date")
+  lastUpdatedDate             DateTime? @map("last_updated_date")
+  estimatedAwardDate          DateTime? @map("estimated_award_date")
+  
+  // Funding Information
+  estimatedTotalFunding       BigInt?   @map("estimated_total_funding") // Max 15 chars
+  awardCeiling                BigInt?   @map("award_ceiling") // Max 15 chars
+  awardFloor                  BigInt?   @map("award_floor") // Max 15 chars
+  expectedNumberOfAwards      Int?      @map("expected_awards") // Max 15 chars
+  costSharingRequired         Boolean?  @map("cost_sharing_required")
+  
+  // Categorical Classifications
+  opportunityCategory         String?   @map("opportunity_category") // D, M, C, E, O
+  fundingInstrumentType       String?   @map("funding_instrument_type") // G, CA, O, PC
+  categoryOfFundingActivity   String?   @map("category_of_funding_activity") // 3 chars: AG, HL, ED, etc.
+  cfdaNumbers                 String[]  @map("cfda_numbers") // Array of CFDA numbers
+  
+  // Eligibility Information
+  eligibleApplicants          String?   @map("eligible_applicants") // 2 chars coded
+  additionalEligibilityInfo   String?   @map("eligibility_details") @db.Text // Max 4,000 chars
+  
+  // Version and Status
+  version                     String?
+  status                      String?   @default("active")
+  
+  // Forecast-specific fields (v2 format)
+  estimatedSynopsisPostDate   DateTime? @map("estimated_synopsis_post_date")
+  estimatedSynopsisCloseDate  DateTime? @map("estimated_synopsis_close_date")
+  estimatedProjectStartDate   DateTime? @map("estimated_project_start_date")
+  fiscalYear                  Int?      @map("fiscal_year")
+  
+  // Timestamps
+  createdAt                   DateTime  @default(now()) @map("created_at")
+  updatedAt                   DateTime  @updatedAt @map("updated_at")
+  
+  // Relations
+  contacts                    OpportunityContact[]
+  changes                     OpportunityChange[]
+  
+  @@map("opportunities")
+  @@index([agencyCode])
+  @@index([opportunityCategory])
+  @@index([fundingInstrumentType])
+  @@index([categoryOfFundingActivity])
+  @@index([postDate])
+  @@index([closeDate])
+  @@index([estimatedTotalFunding])
+}
+
+// Contact information table
+model OpportunityContact {
+  id                     Int     @id @default(autoincrement())
+  opportunityId          String  @map("opportunity_id")
+  contactText            String? @map("contact_text") @db.Text // Max 2,500 chars
+  contactEmail           String? @map("contact_email") // Max 130 chars
+  contactName            String? @map("contact_name")
+  contactPhone           String? @map("contact_phone")
+  additionalInfoUrl      String? @map("additional_info_url") // Max 250 chars
+  
+  // Timestamps
+  createdAt              DateTime @default(now()) @map("created_at")
+  updatedAt              DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  opportunity            Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  
+  @@map("opportunity_contacts")
+  @@index([opportunityId])
+}
+
+// Change tracking table
+model OpportunityChange {
+  id             Int      @id @default(autoincrement())
+  opportunityId  String   @map("opportunity_id")
+  changeType     String   @map("change_type") // 'new', 'modified', 'archived'
+  changeDate     DateTime @default(now()) @map("change_date")
+  source         String   // 'xml_extract', 'rss_feed', 'api'
+  details        String?  @db.Text // Additional change details
+  
+  // Relations
+  opportunity    Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  
+  @@map("opportunity_changes")
+  @@index([opportunityId])
+  @@index([changeType])
+  @@index([changeDate])
+}
