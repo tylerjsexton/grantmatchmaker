@@ -1,0 +1,42 @@
+
+> build
+> next build
+
+  ▲ Next.js 14.2.28
+  - Environments: .env
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/10) ...
+   Generating static pages (2/10) 
+   Generating static pages (4/10) 
+   Generating static pages (7/10) 
+ ✓ Generating static pages (10/10)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                              Size     First Load JS
+┌ ○ /                                    175 B          96.1 kB
+├ ○ /_not-found                          873 B          88.1 kB
+├ ○ /admin                               3.86 kB         115 kB
+├ ƒ /api/auth/[...nextauth]              0 B                0 B
+├ ƒ /api/collect-grants                  0 B                0 B
+├ ƒ /api/grants                          0 B                0 B
+├ ƒ /api/signup                          0 B                0 B
+├ ƒ /grants                              64.7 kB         185 kB
+├ ƒ /grants/[id]                         575 B           104 kB
+├ ○ /login                               2.17 kB         116 kB
+├ ○ /signup                              2.44 kB         117 kB
+└ ○ /test                                138 B          87.4 kB
++ First Load JS shared by all            87.2 kB
+  ├ chunks/117-77d1f20f7ea1b598.js       31.6 kB
+  ├ chunks/fd9d1056-142b32a47bdeb1fe.js  53.6 kB
+  └ other shared chunks (total)          1.96 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
